@@ -1,3 +1,5 @@
+import { SinalizacaoSolicitada } from './sinalizacao-solicitada.model';
+
 export interface Solicitacao {
   id?: string;
   matSolicitante: string;
@@ -8,8 +10,7 @@ export interface Solicitacao {
   placa: string;
   evento: string;
   localDeUtilizacao: string;
-  sinalizacaoSolicitada: string;
-  quantidade: number;
+  sinalizacoesSolicitadas: SinalizacaoSolicitada[];  // lista de sinalizações
   devolucao: boolean;
   emCampo: number;
   extraviada: number;

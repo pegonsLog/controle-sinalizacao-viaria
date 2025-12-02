@@ -4,48 +4,85 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { SinalizacaoService } from '../../../services/sinalizacao.service';
 import { Sinalizacao } from '../../../models';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-sinalizacao-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, IconComponent],
   template: `
     <div class="page-container">
       <div class="page-header">
-        <h1>{{ isEdicao ? 'Editar' : 'Nova' }} Sinalização</h1>
+        <a routerLink="/sinalizacoes" class="back-link">
+          <app-icon name="arrow-left" [size]="20"></app-icon>
+          Voltar
+        </a>
+        <div class="header-content">
+          <div class="header-icon">
+            <app-icon name="map-pin" [size]="24"></app-icon>
+          </div>
+          <div>
+            <h1>{{ isEdicao ? 'Editar' : 'Nova' }} Sinalização</h1>
+            <p class="header-subtitle">{{ isEdicao ? 'Atualize o tipo de sinalização' : 'Cadastre um novo tipo de sinalização' }}</p>
+          </div>
+        </div>
       </div>
 
       <form (ngSubmit)="salvar()" class="form-card">
-        <div class="form-group">
-          <label for="nomeSinalizacao">Nome da Sinalização *</label>
-          <input type="text" id="nomeSinalizacao" [(ngModel)]="sinalizacao.nomeSinalizacao" name="nomeSinalizacao" required />
+        <div class="form-section">
+          <div class="form-group">
+            <label for="nomeSinalizacao">
+              <app-icon name="map-pin" [size]="16"></app-icon>
+              Nome da Sinalização
+            </label>
+            <input type="text" id="nomeSinalizacao" [(ngModel)]="sinalizacao.nomeSinalizacao" name="nomeSinalizacao" placeholder="Ex: Cone de sinalização, Cavalete, etc." required />
+          </div>
         </div>
 
         <div class="form-actions">
-          <a routerLink="/sinalizacoes" class="btn btn-secondary">Cancelar</a>
+          <a routerLink="/sinalizacoes" class="btn btn-secondary">
+            <app-icon name="x-mark" [size]="18"></app-icon>
+            Cancelar
+          </a>
           <button type="submit" class="btn btn-primary" [disabled]="loading">
-            {{ loading ? 'Salvando...' : 'Salvar' }}
+            @if (loading) {
+              <span class="spinner"></span>
+              Salvando...
+            } @else {
+              <app-icon name="check" [size]="18"></app-icon>
+              Salvar
+            }
           </button>
         </div>
       </form>
     </div>
   `,
   styles: [`
-    .page-container { padding: 1.5rem; max-width: 600px; margin: 0 auto; }
-    .page-header { margin-bottom: 1.5rem; }
-    h1 { color: #1e3a5f; margin: 0; }
-    .form-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
-    .form-group { margin-bottom: 1rem; }
-    label { display: block; margin-bottom: 0.375rem; font-weight: 500; color: #333; font-size: 0.875rem; }
-    input { width: 100%; padding: 0.625rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.875rem; }
-    input:focus { outline: none; border-color: #2d5a87; }
-    .form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #eee; }
-    .btn { padding: 0.625rem 1.25rem; border-radius: 6px; font-weight: 500; text-decoration: none; cursor: pointer; border: none; font-size: 0.875rem; }
-    .btn-primary { background: #1e3a5f; color: white; }
-    .btn-primary:hover:not(:disabled) { background: #2d5a87; }
-    .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
-    .btn-secondary { background: #e9ecef; color: #495057; }
-    .btn-secondary:hover { background: #dee2e6; }
+    .page-container { padding: 2rem; max-width: 640px; margin: 0 auto; }
+    .page-header { margin-bottom: 2rem; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: #6b7280; text-decoration: none; font-size: 0.875rem; font-weight: 500; margin-bottom: 1.5rem; transition: color 0.2s; }
+    .back-link:hover { color: #374151; }
+    .header-content { display: flex; align-items: center; gap: 1rem; }
+    .header-icon { width: 52px; height: 52px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25); }
+    h1 { color: #1f2937; margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
+    .header-subtitle { color: #6b7280; margin: 0.25rem 0 0; font-size: 0.875rem; }
+    .form-card { background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+    .form-section { display: flex; flex-direction: column; gap: 1.5rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; font-weight: 600; color: #374151; }
+    label app-icon { color: #6b7280; }
+    input { width: 100%; padding: 0.875rem 1rem; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 0.9375rem; transition: all 0.2s ease; background: #f9fafb; }
+    input:focus { outline: none; border-color: #f59e0b; background: white; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1); }
+    input::placeholder { color: #9ca3af; }
+    .form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #f3f4f6; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 10px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; font-size: 0.875rem; transition: all 0.2s ease; }
+    .btn-primary { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25); }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(245, 158, 11, 0.3); }
+    .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .btn-secondary { background: #f3f4f6; color: #4b5563; }
+    .btn-secondary:hover { background: #e5e7eb; }
+    .spinner { width: 18px; height: 18px; border: 2px solid rgba(255, 255, 255, 0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   `]
 })
 export class SinalizacaoFormComponent implements OnInit {
