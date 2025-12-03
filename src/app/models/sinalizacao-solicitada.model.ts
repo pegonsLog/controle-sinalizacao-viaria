@@ -4,4 +4,8 @@ export interface SinalizacaoSolicitada {
   tipo: string;           // nome/tipo da sinalização (para exibição)
   quantidade: number;
   devolvida: boolean;     // indica se foi devolvida individualmente
+  emCampo: number;
+  extraviada: number;
+  avariada: number;
+  justificativaExtravio: string;
 }

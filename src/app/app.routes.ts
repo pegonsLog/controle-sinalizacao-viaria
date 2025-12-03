@@ -73,6 +73,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/usuarios/usuario-form/usuario-form.component').then(m => m.UsuarioFormComponent)
   },
   {
+    path: 'relatorios',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/relatorios/relatorio.component').then(m => m.RelatorioComponent)
+  },
+  {
     path: '**',
     redirectTo: 'solicitacoes'
   }

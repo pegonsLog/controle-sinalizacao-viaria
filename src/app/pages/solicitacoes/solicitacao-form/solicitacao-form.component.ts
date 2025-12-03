@@ -7,12 +7,11 @@ import { FuncionarioService } from '../../../services/funcionario.service';
 import { SinalizacaoService } from '../../../services/sinalizacao.service';
 import { Solicitacao, Funcionario, Sinalizacao, SinalizacaoSolicitada } from '../../../models';
 import { DateMaskDirective } from '../../../shared/directives/date-mask.directive';
-import { PlacaMaskDirective } from '../../../shared/directives/placa-mask.directive';
 
 @Component({
   selector: 'app-solicitacao-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DateMaskDirective, PlacaMaskDirective],
+  imports: [CommonModule, FormsModule, RouterLink, DateMaskDirective],
   template: `
     <div class="page-container">
       <div class="page-header">
@@ -59,7 +58,7 @@ import { PlacaMaskDirective } from '../../../shared/directives/placa-mask.direct
         <div class="form-row">
           <div class="form-group">
             <label for="placa">Placa *</label>
-            <input type="text" id="placa" [(ngModel)]="solicitacao.placa" name="placa" appPlacaMask placeholder="AAA-AAAA" maxlength="8" required />
+            <input type="text" id="placa" [(ngModel)]="solicitacao.placa" name="placa" placeholder="Placa do veículo" required />
           </div>
           <div class="form-group">
             <label for="evento">Evento *</label>
@@ -111,9 +110,13 @@ import { PlacaMaskDirective } from '../../../shared/directives/placa-mask.direct
               <thead>
                 <tr>
                   <th>Tipo</th>
-                  <th>Quantidade</th>
+                  <th>Qtd</th>
                   @if (isEdicao) {
                     <th>Devolvida</th>
+                    <th>Em Campo</th>
+                    <th>Extraviada</th>
+                    <th>Avariada</th>
+                    <th>Justificativa</th>
                   }
                   <th>Ações</th>
                 </tr>
@@ -130,6 +133,18 @@ import { PlacaMaskDirective } from '../../../shared/directives/placa-mask.direct
                           <span class="checkmark"></span>
                           <span class="checkbox-label">{{ item.devolvida ? 'Sim' : 'Não' }}</span>
                         </label>
+                      </td>
+                      <td>
+                        <input type="number" [(ngModel)]="item.emCampo" [name]="'emCampo_' + $index" min="0" class="input-small" />
+                      </td>
+                      <td>
+                        <input type="number" [(ngModel)]="item.extraviada" [name]="'extraviada_' + $index" min="0" class="input-small" />
+                      </td>
+                      <td>
+                        <input type="number" [(ngModel)]="item.avariada" [name]="'avariada_' + $index" min="0" class="input-small" />
+                      </td>
+                      <td>
+                        <input type="text" [(ngModel)]="item.justificativaExtravio" [name]="'justificativa_' + $index" class="input-justificativa" placeholder="Justificativa..." />
                       </td>
                     }
                     <td class="td-actions">
@@ -151,8 +166,8 @@ import { PlacaMaskDirective } from '../../../shared/directives/placa-mask.direct
 
         <div class="form-row">
           <div class="form-group">
-            <label for="dataPrevistaDevolucao">Data Prevista Devolução *</label>
-            <input type="text" id="dataPrevistaDevolucao" [(ngModel)]="dataPrevistaDevolucaoStr" name="dataPrevistaDevolucao" appDateMask placeholder="dd/mm/aaaa" maxlength="10" required />
+            <label for="dataPrevistaDevolucao">Data Prevista Devolução</label>
+            <input type="text" id="dataPrevistaDevolucao" [(ngModel)]="dataPrevistaDevolucaoStr" name="dataPrevistaDevolucao" appDateMask placeholder="dd/mm/aaaa" maxlength="10" />
           </div>
         </div>
 
@@ -161,37 +176,17 @@ import { PlacaMaskDirective } from '../../../shared/directives/placa-mask.direct
         <h3>Devolução</h3>
 
         <div class="form-row">
-          <div class="form-group checkbox-group">
-            <label>
-              <input type="checkbox" [(ngModel)]="solicitacao.devolucao" name="devolucao" />
-              Devolvido
-            </label>
+          <div class="form-group">
+            <label for="statusDevolucao">Status da Devolução</label>
+            <select id="statusDevolucao" [(ngModel)]="solicitacao.statusDevolucao" name="statusDevolucao">
+              <option value="nao_devolvido">Não Devolvido</option>
+              <option value="parcialmente_devolvido">Parcialmente Devolvido</option>
+              <option value="devolvido">Devolvido</option>
+            </select>
           </div>
         </div>
 
-        @if (solicitacao.devolucao) {
-          <div class="form-row">
-            <div class="form-group">
-              <label for="emCampo">Em Campo</label>
-              <input type="number" id="emCampo" [(ngModel)]="solicitacao.emCampo" name="emCampo" min="0" />
-            </div>
-            <div class="form-group">
-              <label for="extraviada">Extraviada</label>
-              <input type="number" id="extraviada" [(ngModel)]="solicitacao.extraviada" name="extraviada" min="0" />
-            </div>
-            <div class="form-group">
-              <label for="avariada">Avariada</label>
-              <input type="number" id="avariada" [(ngModel)]="solicitacao.avariada" name="avariada" min="0" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="justificativaExtravio">Justificativa Extravio</label>
-              <textarea id="justificativaExtravio" [(ngModel)]="solicitacao.justificativaExtravio" name="justificativaExtravio" rows="3"></textarea>
-            </div>
-          </div>
-
+        @if (solicitacao.statusDevolucao !== 'nao_devolvido') {
           <div class="form-row">
             <div class="form-group">
               <label for="devolvidoPara">Devolvido Para</label>
@@ -532,6 +527,22 @@ import { PlacaMaskDirective } from '../../../shared/directives/placa-mask.direct
       padding: 1rem;
       margin: 0;
     }
+
+    .input-small {
+      width: 70px;
+      padding: 0.375rem 0.5rem;
+      font-size: 0.8125rem;
+    }
+
+    .input-justificativa {
+      width: 150px;
+      padding: 0.375rem 0.5rem;
+      font-size: 0.8125rem;
+    }
+
+    .sinalizacoes-table {
+      overflow-x: auto;
+    }
   `]
 })
 export class SolicitacaoFormComponent implements OnInit {
@@ -551,12 +562,8 @@ export class SolicitacaoFormComponent implements OnInit {
     evento: '',
     localDeUtilizacao: '',
     sinalizacoesSolicitadas: [],
-    devolucao: false,
-    emCampo: 0,
-    extraviada: 0,
-    avariada: 0,
-    justificativaExtravio: '',
-    dataPrevistaDevolucao: new Date(),
+    statusDevolucao: 'nao_devolvido',
+    dataPrevistaDevolucao: null,
     devolvidoPara: '',
     dataDevolucao: null,
     horaDevolucao: null
@@ -576,7 +583,11 @@ export class SolicitacaoFormComponent implements OnInit {
     sinalizacaoId: '',
     tipo: '',
     quantidade: 1,
-    devolvida: false
+    devolvida: false,
+    emCampo: 0,
+    extraviada: 0,
+    avariada: 0,
+    justificativaExtravio: ''
   };
 
   ngOnInit(): void {
@@ -637,7 +648,11 @@ export class SolicitacaoFormComponent implements OnInit {
       sinalizacaoId: this.novaSinalizacao.sinalizacaoId,
       tipo: this.novaSinalizacao.tipo,
       quantidade: this.novaSinalizacao.quantidade,
-      devolvida: false
+      devolvida: false,
+      emCampo: 0,
+      extraviada: 0,
+      avariada: 0,
+      justificativaExtravio: ''
     });
 
     // Limpar campos
@@ -645,7 +660,11 @@ export class SolicitacaoFormComponent implements OnInit {
       sinalizacaoId: '',
       tipo: '',
       quantidade: 1,
-      devolvida: false
+      devolvida: false,
+      emCampo: 0,
+      extraviada: 0,
+      avariada: 0,
+      justificativaExtravio: ''
     };
   }
 
@@ -679,7 +698,11 @@ export class SolicitacaoFormComponent implements OnInit {
       sinalizacaoId: '',
       tipo: '',
       quantidade: 1,
-      devolvida: false
+      devolvida: false,
+      emCampo: 0,
+      extraviada: 0,
+      avariada: 0,
+      justificativaExtravio: ''
     };
   }
 
@@ -688,10 +711,10 @@ export class SolicitacaoFormComponent implements OnInit {
 
     try {
       const dataSolicitacao = this.parseDate(this.dataSolicitacaoStr);
-      const dataPrevistaDevolucao = this.parseDate(this.dataPrevistaDevolucaoStr);
+      const dataPrevistaDevolucao = this.dataPrevistaDevolucaoStr ? this.parseDate(this.dataPrevistaDevolucaoStr) : null;
       
-      if (!dataSolicitacao || !dataPrevistaDevolucao) {
-        alert('Data inválida. Use o formato dd/mm/aaaa');
+      if (!dataSolicitacao) {
+        alert('Data de solicitação inválida. Use o formato dd/mm/aaaa');
         this.loading = false;
         return;
       }

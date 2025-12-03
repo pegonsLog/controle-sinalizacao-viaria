@@ -20,7 +20,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
             <app-icon name="clipboard-document-list" [size]="24"></app-icon>
           </div>
           <div>
-            <h1>Solicitações</h1>
+            <h1>Solicitações de Retirada de Sinalização</h1>
             <p class="header-subtitle">Lista de retirada de sinalização</p>
           </div>
         </div>
@@ -49,6 +49,27 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
               <span class="filter-label">
                 <app-icon name="map-pin" [size]="16"></app-icon>
                 Em campo
+              </span>
+            </label>
+            <label class="filter-checkbox filter-partial">
+              <input type="checkbox" [(ngModel)]="filtrarParcial" />
+              <span class="filter-label">
+                <app-icon name="clock" [size]="16"></app-icon>
+                Parcial
+              </span>
+            </label>
+            <label class="filter-checkbox filter-danger">
+              <input type="checkbox" [(ngModel)]="filtrarExtraviada" />
+              <span class="filter-label">
+                <app-icon name="exclamation-circle" [size]="16"></app-icon>
+                Extraviada
+              </span>
+            </label>
+            <label class="filter-checkbox filter-avariada">
+              <input type="checkbox" [(ngModel)]="filtrarAvariada" />
+              <span class="filter-label">
+                <app-icon name="wrench" [size]="16"></app-icon>
+                Avariada
               </span>
             </label>
           </div>
@@ -90,17 +111,32 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
                   <td>
                     <div class="sinalizacoes-cell">
                       <span class="cell-sinalizacoes">{{ formatarSinalizacoes(item) }}</span>
-                      @if (temPendentes(item)) {
-                        <span class="badge-pendente" [title]="contarPendentes(item) + ' item(ns) pendente(s)'">
-                          {{ contarPendentes(item) }}
-                        </span>
+                      @if (item.statusDevolucao !== 'nao_devolvido') {
+                        @if (temPendentes(item)) {
+                          <span class="badge-pendente" [title]="contarPendentes(item) + ' item(ns) pendente(s)'">
+                            P
+                          </span>
+                        }
+                        @if (temExtraviada(item)) {
+                          <span class="badge-extraviada" [title]="contarExtraviadas(item) + ' extraviada(s)'">
+                            E
+                          </span>
+                        }
+                        @if (temAvariada(item)) {
+                          <span class="badge-avariada" [title]="contarAvariadas(item) + ' avariada(s)'">
+                            A
+                          </span>
+                        }
                       }
                     </div>
                   </td>
                   <td>
-                    <span class="status-badge" [class.status-success]="item.devolucao" [class.status-warning]="!item.devolucao">
+                    <span class="status-badge" 
+                      [class.status-success]="item.statusDevolucao === 'devolvido'" 
+                      [class.status-warning]="item.statusDevolucao === 'nao_devolvido'"
+                      [class.status-partial]="item.statusDevolucao === 'parcialmente_devolvido'">
                       <span class="status-dot"></span>
-                      {{ item.devolucao ? 'Devolvido' : 'Em campo' }}
+                      {{ getStatusDevolucaoLabel(item.statusDevolucao) }}
                     </span>
                   </td>
                   <td class="actions">
@@ -183,8 +219,12 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
                   <thead>
                     <tr>
                       <th>Tipo</th>
-                      <th>Quantidade</th>
+                      <th>Qtd</th>
                       <th>Status</th>
+                      <th>Em Campo</th>
+                      <th>Extraviada</th>
+                      <th>Avariada</th>
+                      <th>Justificativa</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -197,10 +237,14 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
                             {{ sin.devolvida ? 'Devolvida' : 'Pendente' }}
                           </span>
                         </td>
+                        <td>{{ sin.emCampo || 0 }}</td>
+                        <td>{{ sin.extraviada || 0 }}</td>
+                        <td>{{ sin.avariada || 0 }}</td>
+                        <td>{{ sin.justificativaExtravio || '-' }}</td>
                       </tr>
                     } @empty {
                       <tr>
-                        <td colspan="3" class="empty-text">Nenhuma sinalização</td>
+                        <td colspan="7" class="empty-text">Nenhuma sinalização</td>
                       </tr>
                     }
                   </tbody>
@@ -211,31 +255,15 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
                 <div class="detail-item">
                   <span class="detail-label">Status Geral</span>
                   <span class="detail-value">
-                    <span class="status-badge" [class.status-success]="solicitacaoSelecionada.devolucao" [class.status-warning]="!solicitacaoSelecionada.devolucao">
-                      {{ solicitacaoSelecionada.devolucao ? 'Devolvido' : 'Em campo' }}
+                    <span class="status-badge" 
+                      [class.status-success]="solicitacaoSelecionada.statusDevolucao === 'devolvido'" 
+                      [class.status-warning]="solicitacaoSelecionada.statusDevolucao === 'nao_devolvido'"
+                      [class.status-partial]="solicitacaoSelecionada.statusDevolucao === 'parcialmente_devolvido'">
+                      {{ getStatusDevolucaoLabel(solicitacaoSelecionada.statusDevolucao) }}
                     </span>
                   </span>
                 </div>
-                <div class="detail-item">
-                  <span class="detail-label">Em Campo</span>
-                  <span class="detail-value">{{ solicitacaoSelecionada.emCampo }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">Extraviada</span>
-                  <span class="detail-value">{{ solicitacaoSelecionada.extraviada }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">Avariada</span>
-                  <span class="detail-value">{{ solicitacaoSelecionada.avariada }}</span>
-                </div>
               </div>
-
-              @if (solicitacaoSelecionada.justificativaExtravio) {
-                <div class="detail-item full-width">
-                  <span class="detail-label">Justificativa Extravio</span>
-                  <span class="detail-value">{{ solicitacaoSelecionada.justificativaExtravio }}</span>
-                </div>
-              }
             </div>
             <div class="modal-footer">
               <a [routerLink]="['/solicitacoes/editar', solicitacaoSelecionada.id]" class="btn btn-primary">
@@ -378,6 +406,30 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
       color: #f59e0b;
     }
 
+    .filter-partial input[type="checkbox"] {
+      accent-color: #d97706;
+    }
+
+    .filter-partial:has(input:checked) .filter-label {
+      color: #d97706;
+    }
+
+    .filter-danger input[type="checkbox"] {
+      accent-color: #7c3aed;
+    }
+
+    .filter-danger:has(input:checked) .filter-label {
+      color: #7c3aed;
+    }
+
+    .filter-avariada input[type="checkbox"] {
+      accent-color: #dc2626;
+    }
+
+    .filter-avariada:has(input:checked) .filter-label {
+      color: #dc2626;
+    }
+
     .search-box {
       display: flex;
       align-items: center;
@@ -507,6 +559,36 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
       flex-shrink: 0;
     }
 
+    .badge-extraviada {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      background: #7c3aed;
+      color: white;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
+    .badge-avariada {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      background: #dc2626;
+      color: white;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
     .status-badge {
       display: inline-flex;
       align-items: center;
@@ -539,6 +621,15 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
 
     .status-warning .status-dot {
       background: #f59e0b;
+    }
+
+    .status-partial {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-partial .status-dot {
+      background: #d97706;
     }
 
     .actions {
@@ -815,6 +906,9 @@ export class SolicitacaoListaComponent implements OnInit {
   termoBusca = '';
   filtrarPendentes = false;
   filtrarEmCampo = false;
+  filtrarParcial = false;
+  filtrarExtraviada = false;
+  filtrarAvariada = false;
   solicitacaoSelecionada: Solicitacao | null = null;
 
   get solicitacoesFiltradas(): Solicitacao[] {
@@ -827,7 +921,22 @@ export class SolicitacaoListaComponent implements OnInit {
 
     // Filtro de em campo (não devolvido)
     if (this.filtrarEmCampo) {
-      resultado = resultado.filter(s => !s.devolucao);
+      resultado = resultado.filter(s => s.statusDevolucao === 'nao_devolvido');
+    }
+
+    // Filtro de parcialmente devolvido
+    if (this.filtrarParcial) {
+      resultado = resultado.filter(s => s.statusDevolucao === 'parcialmente_devolvido');
+    }
+
+    // Filtro de extraviada
+    if (this.filtrarExtraviada) {
+      resultado = resultado.filter(s => this.temExtraviada(s));
+    }
+
+    // Filtro de avariada
+    if (this.filtrarAvariada) {
+      resultado = resultado.filter(s => this.temAvariada(s));
     }
 
     // Filtro de busca por texto
@@ -861,6 +970,14 @@ export class SolicitacaoListaComponent implements OnInit {
     return this.funcionariosMap.get(matricula) || matricula;
   }
 
+  getStatusDevolucaoLabel(status: string): string {
+    switch (status) {
+      case 'devolvido': return 'Devolvido';
+      case 'parcialmente_devolvido': return 'Parcial';
+      default: return 'Em campo';
+    }
+  }
+
   formatarSinalizacoes(item: Solicitacao): string {
     if (!item.sinalizacoesSolicitadas || item.sinalizacoesSolicitadas.length === 0) {
       return '-';
@@ -878,6 +995,26 @@ export class SolicitacaoListaComponent implements OnInit {
   contarPendentes(item: Solicitacao): number {
     if (!item.sinalizacoesSolicitadas) return 0;
     return item.sinalizacoesSolicitadas.filter(s => !s.devolvida).length;
+  }
+
+  temExtraviada(item: Solicitacao): boolean {
+    if (!item.sinalizacoesSolicitadas) return false;
+    return item.sinalizacoesSolicitadas.some(s => s.extraviada > 0);
+  }
+
+  contarExtraviadas(item: Solicitacao): number {
+    if (!item.sinalizacoesSolicitadas) return 0;
+    return item.sinalizacoesSolicitadas.reduce((total, s) => total + (s.extraviada || 0), 0);
+  }
+
+  temAvariada(item: Solicitacao): boolean {
+    if (!item.sinalizacoesSolicitadas) return false;
+    return item.sinalizacoesSolicitadas.some(s => s.avariada > 0);
+  }
+
+  contarAvariadas(item: Solicitacao): number {
+    if (!item.sinalizacoesSolicitadas) return 0;
+    return item.sinalizacoesSolicitadas.reduce((total, s) => total + (s.avariada || 0), 0);
   }
 
   verDetalhes(item: Solicitacao): void {

@@ -1,5 +1,7 @@
 import { SinalizacaoSolicitada } from './sinalizacao-solicitada.model';
 
+export type StatusDevolucao = 'nao_devolvido' | 'parcialmente_devolvido' | 'devolvido';
+
 export interface Solicitacao {
   id?: string;
   matSolicitante: string;
@@ -11,12 +13,8 @@ export interface Solicitacao {
   evento: string;
   localDeUtilizacao: string;
   sinalizacoesSolicitadas: SinalizacaoSolicitada[];  // lista de sinalizações
-  devolucao: boolean;
-  emCampo: number;
-  extraviada: number;
-  avariada: number;
-  justificativaExtravio: string;
-  dataPrevistaDevolucao: Date;
+  statusDevolucao: StatusDevolucao;
+  dataPrevistaDevolucao: Date | null;
   devolvidoPara: string;
   dataDevolucao: Date | null;
   horaDevolucao: string | null;

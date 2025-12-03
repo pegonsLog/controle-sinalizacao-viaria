@@ -19,8 +19,8 @@ import { AuthService } from '../../services/auth.service';
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
               </svg>
             </div>
-            <h1>Sinalização Viária</h1>
-            <p class="subtitle">Sistema de Controle e Gestão</p>
+            <h1>CSV</h1>
+            <p class="subtitle">Controle de Sinalização Viária</p>
           </div>
           
           <form (ngSubmit)="login()" class="login-form">
@@ -85,9 +85,7 @@ import { AuthService } from '../../services/auth.service';
               }
             </button>
           </form>
-        </div>
-        
-        <p class="copyright">© 2024 Sistema de Sinalização Viária</p>
+        </div>     
       </div>
     </div>
   `,

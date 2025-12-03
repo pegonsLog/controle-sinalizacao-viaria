@@ -12,28 +12,35 @@ import { IconComponent } from '../shared/components/icon/icon.component';
     <div class="layout">
       <header class="header">
         <div class="header-left">
+          <button class="btn-menu" (click)="toggleMenu()">
+            <app-icon [name]="menuAberto ? 'x-mark' : 'bars-3'" [size]="24"></app-icon>
+          </button>
           <div class="logo">
             <span class="logo-title">GARBO</span>
             <span class="logo-subtitle">Controle de Sinalização Viária</span>
           </div>
         </div>
         
-        <nav class="header-nav">
-          <a routerLink="/solicitacoes" routerLinkActive="active">
+        <nav class="header-nav" [class.nav-open]="menuAberto">
+          <a routerLink="/solicitacoes" routerLinkActive="active" (click)="fecharMenu()">
             <app-icon name="clipboard-document-list" [size]="18"></app-icon>
             <span>Solicitações</span>
           </a>
+          <a routerLink="/relatorios" routerLinkActive="active" (click)="fecharMenu()">
+            <app-icon name="chart-bar" [size]="18"></app-icon>
+            <span>Relatórios</span>
+          </a>
           
           @if (authService.isAdmin()) {
-            <a routerLink="/funcionarios" routerLinkActive="active">
+            <a routerLink="/funcionarios" routerLinkActive="active" (click)="fecharMenu()">
               <app-icon name="users" [size]="18"></app-icon>
               <span>Funcionários</span>
             </a>
-            <a routerLink="/sinalizacoes" routerLinkActive="active">
+            <a routerLink="/sinalizacoes" routerLinkActive="active" (click)="fecharMenu()">
               <app-icon name="map-pin" [size]="18"></app-icon>
               <span>Sinalizações</span>
             </a>
-            <a routerLink="/usuarios" routerLinkActive="active">
+            <a routerLink="/usuarios" routerLinkActive="active" (click)="fecharMenu()">
               <app-icon name="user" [size]="18"></app-icon>
               <span>Usuários</span>
             </a>
@@ -55,6 +62,10 @@ import { IconComponent } from '../shared/components/icon/icon.component';
           </button>
         </div>
       </header>
+
+      @if (menuAberto) {
+        <div class="menu-overlay" (click)="fecharMenu()"></div>
+      }
       
       <main class="main-content">
         <router-outlet></router-outlet>
@@ -212,10 +223,117 @@ import { IconComponent } from '../shared/components/icon/icon.component';
       min-height: calc(100vh - 64px);
       overflow-y: auto;
     }
+
+    .btn-menu {
+      display: none;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 0.5rem;
+      margin-right: 0.5rem;
+    }
+
+    .menu-overlay {
+      display: none;
+    }
+
+    /* Responsivo - Tablet */
+    @media (max-width: 1024px) {
+      .header-nav a span {
+        display: none;
+      }
+
+      .header-nav a {
+        padding: 0.5rem;
+      }
+
+      .user-details {
+        display: none;
+      }
+
+      .user-info {
+        padding: 0;
+        background: none;
+      }
+    }
+
+    /* Responsivo - Mobile */
+    @media (max-width: 768px) {
+      .header {
+        padding: 0 1rem;
+      }
+
+      .btn-menu {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .logo-subtitle {
+        display: none;
+      }
+
+      .header-nav {
+        position: fixed;
+        top: 64px;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #1e3a5f 0%, #142840 100%);
+        flex-direction: column;
+        padding: 1rem;
+        gap: 0.5rem;
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 99;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .header-nav.nav-open {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .header-nav a {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+      }
+
+      .header-nav a span {
+        display: inline;
+      }
+
+      .menu-overlay {
+        display: block;
+        position: fixed;
+        top: 64px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 98;
+      }
+
+      .header-right {
+        gap: 0.5rem;
+      }
+    }
   `]
 })
 export class LayoutComponent {
   authService = inject(AuthService);
+  menuAberto = false;
+
+  toggleMenu(): void {
+    this.menuAberto = !this.menuAberto;
+  }
+
+  fecharMenu(): void {
+    this.menuAberto = false;
+  }
 
   logout(): void {
     this.authService.logout();
